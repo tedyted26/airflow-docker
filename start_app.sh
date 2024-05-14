@@ -5,10 +5,16 @@ function exit_err {
     exit 1
 }
 
-while getopts ":d:i:" option; do
+while getopts ":d:i:c:h:e:xg:f:" option; do
     case "$option" in
         d) PGDATA_DIR=${OPTARG};;
         i) INITIALIZATION="$OPTARG" ;;
+        c) CONFIGURATION="$OPTARG" ;;
+        h) AIRFLOW_HOME=${OPTARG};;
+        e) AIRFLOW__CORE__EXECUTOR="$OPTARG";;
+        x) AIRFLOW__CORE__LOAD__EXAMPLES="True";;
+        g) AIRFLOW__CORE__DAGS_FOLDER=${OPTARG};;
+        f) AIRFLOW__CORE__FERNET_KEY="$OPTARG";;
         :) exit_err "Missing argument for -$OPTARG" ;;
         *) exit_err "Invalid option -$OPTARG" ;;
     esac
@@ -85,18 +91,42 @@ fi
 wait-for-postgres
 
 ## Apply configuration to Airflow
-AIRFLOW__DATABASE__SQL_ALCHEMY_CONN="postgresql+psycopg2://airflow_user:airflow_pass@localhost:5432/airflow_db"
-export AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-echo "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}" >> ~/.bashrc
 
-AIRFLOW__CELERY__BROKER_URL="${REDIS_URL}"
-export AIRFLOW__CELERY__BROKER_URL
-echo "AIRFLOW__CELERY__BROKER_URL=${AIRFLOW__CELERY__BROKER_URL}" >> ~/.bashrc
+# Using configuration file
+if [[ -f "$CONFIGURATION" ]]; then
+    printf "\nCopying configuration file\n"
+    case "$CONFIGURATION" in
+        *.cfg)
+            # TODO: copy the file into ${AIRFLOW_HOME}/airflow.cfg
+        *)
+            exit_err "File format not correct. Configuration must be specified in a *.cfg file."
+            ;;
+    esac
+fi
 
-# Switch from SQLite to postgres
+# Using variables
+declare -A airflow_variables=(
+    ["AIRFLOW_HOME"]=$AIRFLOW_HOME
+    ["AIRFLOW__CORE__EXECUTOR"]=$AIRFLOW__CORE__EXECUTOR
+    ["AIRFLOW__CORE__LOAD__EXAMPLES"]=$AIRFLOW__CORE__LOAD__EXAMPLES
+    ["AIRFLOW__CORE__DAGS_FOLDER"]=$AIRFLOW__CORE__DAGS_FOLDER
+    ["AIRFLOW__CORE__FERNET_KEY"]=$AIRFLOW__CORE__FERNET_KEY
+    ["AIRFLOW__DATABASE__SQL_ALCHEMY_CONN"]="postgresql+psycopg2://airflow_user:airflow_pass@localhost:5432/airflow_db"
+    ["AIRFLOW__CELERY__BROKER_URL"]=$REDIS_URL
+)
+
+# Export the variables if they are set
+for key in "${!airflow_variables[@]}"; do
+    if [[ -n "${airflow_variables[$key]}" ]]; then
+        export "$key"="${airflow_variables[$key]}"
+        echo "$key"="${airflow_variables[$key]}" >> >> ~/.bashrc
+    fi
+done
+
+# Switch from default SQLite to postgres
 airflow db migrate
 
-# Create an airflow user
+# Create an airflow webserver user
 airflow users create \
  --username admin \
  --firstname Admin \
