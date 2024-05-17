@@ -12,11 +12,18 @@ while getopts ":d:i:c:h:e:xg:f:" option; do
         c) CONFIGURATION="$OPTARG" ;;
         h) AIRFLOW_HOME=${OPTARG};;
         e) AIRFLOW__CORE__EXECUTOR="$OPTARG";;
-        x) AIRFLOW__CORE__LOAD__EXAMPLES="True";;
+        # FIXME: By default is true, so maybe set it to false here or put it up
+        x) AIRFLOW__CORE__LOAD__EXAMPLES="True";; 
         g) AIRFLOW__CORE__DAGS_FOLDER=${OPTARG};;
         f) AIRFLOW__CORE__FERNET_KEY="$OPTARG";;
+        # FIXME: add a parameter for providers?
+        # would have to run again $ pip install "apache-airflow==2.9.1" apache-airflow-providers-google==10.1.0
+        # This is to ensure pip doesnt upgrade/downgrade airflow by accident
         :) exit_err "Missing argument for -$OPTARG" ;;
         *) exit_err "Invalid option -$OPTARG" ;;
+        # FIXME: add celery result backend? by default is the metadata DB (postgres)
+        # FIXME: add webserver secret key?
+        # FIXME: add webserver_config.py?
     esac
 done
 
@@ -97,7 +104,7 @@ if [[ -f "$CONFIGURATION" ]]; then
     printf "\nCopying configuration file\n"
     case "$CONFIGURATION" in
         *.cfg)
-            # TODO: copy the file into ${AIRFLOW_HOME}/airflow.cfg
+            # FIXME: copy the file into ${AIRFLOW_HOME}/airflow.cfg
         *)
             exit_err "File format not correct. Configuration must be specified in a *.cfg file."
             ;;
@@ -126,6 +133,7 @@ done
 # Switch from default SQLite to postgres
 airflow db migrate
 
+# FIXME: use only default credentials or let user choose?
 # Create an airflow webserver user
 airflow users create \
  --username admin \

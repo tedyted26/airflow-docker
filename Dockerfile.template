@@ -28,7 +28,7 @@ COPY --chown="$USERID":"$GROUPID" wait-for-postgres.sh /usr/local/bin/wait-for-p
 ENV AIRFLOW_HOME="/work/Airflow"
 
 # Dependencies for Airflow providers
-RUN apt-get install python3-dev libmysqlclient-dev build-essential pkg-config -y
+RUN apt-get -y update && apt-get install python3-dev libmysqlclient-dev build-essential pkg-config libldap2-dev libsasl2-dev -y
 
 USER $USERID
 
@@ -40,3 +40,8 @@ RUN pip install "apache-airflow[aiobotocore,amazon,async,celery,common-io,elasti
 --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.8.3/constraints-3.10.txt"
 
 WORKDIR /work
+
+RUN chmod +x /usr/local/bin/start_app
+RUN chmod +x /usr/local/bin/wait-for-postgres
+
+RUN /usr/local/bin/start_app
