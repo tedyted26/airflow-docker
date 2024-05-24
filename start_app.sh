@@ -8,21 +8,29 @@ function exit_err {
 PORT=8080
 USERNAME="ucloud"
 PASSWORD="ucloud"
+FIRST_NAME="ucloud"
+LAST_NAME="ucloud"
+EMAIL="ucloud@ucloud.com"
 
-while getopts ":d:i:c:h:e:xg:f:p:u:s:" option; do
+while getopts ":d:i:c:h:e:xg:f:p:u:s:n:l:m:" option; do
     case "$option" in
         d) PGDATA_DIR=${OPTARG};;
         i) INITIALIZATION="$OPTARG" ;;
         c) CONFIGURATION="$OPTARG" ;;
+        # Environment variables
         h) AIRFLOW_HOME=${OPTARG};;
         e) AIRFLOW__CORE__EXECUTOR="$OPTARG";;
         x) AIRFLOW__CORE__LOAD__EXAMPLES="False";; 
         g) AIRFLOW__CORE__DAGS_FOLDER="$OPTARG";;
         f) AIRFLOW__CORE__FERNET_KEY="$OPTARG";;
+        # Webserver related configuration
         p) PORT="$OPTARG";;
         u) USERNAME="$OPTARG";;
         s) PASSWORD="$OPTARG";;
-        # Add note too docs
+        n) FIRST_NAME="$OPTARG";;
+        l) LAST_NAME="$OPTARG";;
+        m) EMAIL="$OPTARG";;
+        # Add note too docs for installation of additional parameters
         # would have to run again $ pip install "apache-airflow==2.9.1" apache-airflow-providers-google==10.1.0
         # This is to ensure pip doesnt upgrade/downgrade airflow by accident
         :) exit_err "Missing argument for -$OPTARG" ;;
@@ -103,10 +111,10 @@ wait-for-postgres
 
 ## Apply configuration to Airflow
 
+if [[ -f "$CONFIGURATION" ]]; then
 printf  "\n==================  "
 printf  "\n Copying configuration file  \n"
 printf  "================== \n\n"
-if [[ -f "$CONFIGURATION" ]]; then
     if [[ ! -d "$AIRFLOW_HOME" ]]; then
         mkdir "$AIRFLOW_HOME"
     fi
@@ -137,20 +145,19 @@ for key in "${!airflow_variables[@]}"; do
 done
 
 # Switch from default SQLite to postgres
-# airflow db migrate
+airflow db migrate
 
-# FIXME: use only default credentials or let user choose?
 # Create an airflow webserver user
 airflow users create \
  --username "$USERNAME" \
- --firstname FIRST_NAME \
- --lastname LAST_NAME \
+ --firstname "$FIRST_NAME" \
+ --lastname "$LAST_NAME" \
  --role Admin \
  --password "$PASSWORD"  \
- --email admin@example.org        
+ --email "$EMAIL"        
  
 # Start Airflow
-#airflow webserver --port "$PORT" &
-#airflow scheduler &
+airflow webserver --port "$PORT" &
+airflow scheduler &
 
-#sleep infinity
+sleep infinity
