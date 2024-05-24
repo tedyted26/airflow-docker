@@ -17,7 +17,8 @@ RUN apt-get -y update \
  && rm -rf /var/lib/apt/lists/* \
  && pip install --no-cache-dir --upgrade pip \
  ## PostgreSQL adapter for Python
- && pip install --no-cache-dir psycopg2-binary
+ && pip install --no-cache-dir psycopg2-binary \
+ && chown -R "$USERID":"$GROUPID" /var/run/postgresql 
 
 COPY --chown="$USERID":"$GROUPID" start_app.sh /usr/local/bin/start_app
 COPY --chown="$USERID":"$GROUPID" wait-for-postgres.sh /usr/local/bin/wait-for-postgres
@@ -28,7 +29,7 @@ COPY --chown="$USERID":"$GROUPID" wait-for-postgres.sh /usr/local/bin/wait-for-p
 ENV AIRFLOW_HOME="/work/Airflow"
 
 # Dependencies for Airflow providers
-RUN apt-get -y update && apt-get install python3-dev libmysqlclient-dev build-essential pkg-config libldap2-dev libsasl2-dev -y
+RUN apt-get -y update && apt-get install python3-dev libmysqlclient-dev build-essential pkg-config libldap2-dev libsasl2-dev unixodbc -y
 
 USER $USERID
 
@@ -36,7 +37,7 @@ USER $USERID
 RUN pip install mysqlclient
 
 #cncf-kubernetes and docker are removed from the default list
-RUN pip install "apache-airflow[aiobotocore,amazon,async,celery,common-io,elasticsearch,fab,ftp,google,google-auth,graphviz,grpc,hashicorp,http,ldap,microsoft-azure,mysql,odbc,openlineage,pandas,postgres,redis,sendgrid,sftp,slack,snowflake,ssh,statsd,uv,virtualenv]==2.8.3" \
+RUN pip install "apache-airflow[aiobotocore,amazon,async,celery,common-io,elasticsearch,fab,ftp,google,google-auth,graphviz,grpc,hashicorp,http,ldap,microsoft-azure,mysql,odbc,openlineage,pandas,postgres,redis,sendgrid,sftp,slack,snowflake,ssh,statsd,swagger-ui,uv,virtualenv]==2.8.3" \
 --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.8.3/constraints-3.10.txt"
 
 WORKDIR /work
@@ -44,4 +45,4 @@ WORKDIR /work
 RUN chmod +x /usr/local/bin/start_app
 RUN chmod +x /usr/local/bin/wait-for-postgres
 
-RUN /usr/local/bin/start_app
+ENTRYPOINT /usr/local/bin/start_app
