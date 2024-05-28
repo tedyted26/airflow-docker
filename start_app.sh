@@ -140,7 +140,7 @@ declare -A airflow_variables=(
 for key in "${!airflow_variables[@]}"; do
     if [[ -n "${airflow_variables[$key]}" ]]; then
         export "$key"="${airflow_variables[$key]}"
-        echo "$key"="${airflow_variables[$key]}" >> ~/.bashrc
+        echo "export $key"="${airflow_variables[$key]}" >> ~/.bashrc
     fi
 done
 
