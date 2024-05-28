@@ -20,7 +20,7 @@ while getopts ":d:i:c:h:e:xg:f:p:u:s:n:l:m:" option; do
         # Environment variables
         h) AIRFLOW_HOME=${OPTARG};;
         e) AIRFLOW__CORE__EXECUTOR="$OPTARG";;
-        x) AIRFLOW__CORE__LOAD__EXAMPLES="False";; 
+        x) AIRFLOW__CORE__LOAD_EXAMPLES="False";; 
         g) AIRFLOW__CORE__DAGS_FOLDER="$OPTARG";;
         f) AIRFLOW__CORE__FERNET_KEY="$OPTARG";;
         # Webserver related configuration
@@ -128,7 +128,7 @@ fi
 declare -A airflow_variables=(
     ["AIRFLOW_HOME"]="$AIRFLOW_HOME"
     ["AIRFLOW__CORE__EXECUTOR"]="$AIRFLOW__CORE__EXECUTOR"
-    ["AIRFLOW__CORE__LOAD_EXAMPLES"]="$AIRFLOW__CORE__LOAD__EXAMPLES"
+    ["AIRFLOW__CORE__LOAD_EXAMPLES"]="$AIRFLOW__CORE__LOAD_EXAMPLES"
     ["AIRFLOW__CORE__DAGS_FOLDER"]="$AIRFLOW__CORE__DAGS_FOLDER"
     ["AIRFLOW__CORE__FERNET_KEY"]="$AIRFLOW__CORE__FERNET_KEY"
     ["AIRFLOW__CORE__SQL_ALCHEMY_CONN"]="postgresql+psycopg2://airflow_user:airflow_pass@localhost:5432/airflow_db"
