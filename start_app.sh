@@ -134,6 +134,7 @@ declare -A airflow_variables=(
     ["AIRFLOW__CORE__SQL_ALCHEMY_CONN"]="postgresql+psycopg2://airflow_user:airflow_pass@localhost:5432/airflow_db"
     ["AIRFLOW__DATABASE__SQL_ALCHEMY_CONN"]="postgresql+psycopg2://airflow_user:airflow_pass@localhost:5432/airflow_db"
     ["AIRFLOW__CELERY__BROKER_URL"]="$REDIS_URL"
+    ["AIRFLOW__WEBSERVER__WEB_SERVER_PORT"]="$PORT"
 )
 
 # Export the variables if they are set
@@ -154,10 +155,13 @@ airflow users create \
  --lastname "$LAST_NAME" \
  --role Admin \
  --password "$PASSWORD"  \
- --email "$EMAIL"        
+ --email "$EMAIL"  
+
+echo "Successfully created user $USERNAME with password $PASSWORD"      
  
 # Start Airflow
-airflow webserver --port "$PORT" &
+# TODO see if created with nohup or not, just to have the logs in a file
+airflow webserver &
 airflow scheduler &
 
 sleep infinity
