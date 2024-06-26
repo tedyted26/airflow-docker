@@ -37,7 +37,7 @@ USER $USERID
 RUN pip install mysqlclient
 
 #cncf-kubernetes and docker are removed from the default list
-RUN pip install "apache-airflow[aiobotocore,amazon,async,celery,common-io,elasticsearch,fab,ftp,google,google-auth,graphviz,grpc,hashicorp,http,ldap,microsoft-azure,mysql,odbc,openlineage,pandas,postgres,redis,sendgrid,sftp,slack,snowflake,ssh,statsd,swagger-ui,uv,virtualenv]==2.8.3" \
+RUN pip install "apache-airflow[aiobotocore,amazon,async,celery,common-io,elasticsearch,fab,ftp,google,google-auth,graphviz,grpc,hashicorp,http,ldap,microsoft-azure,mysql,odbc,openlineage,pandas,postgres,redis,sendgrid,sftp,slack,snowflake,spark,ssh,statsd,swagger-ui,uv,virtualenv]==2.8.3" \
 --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.8.3/constraints-3.10.txt"
 
 WORKDIR /work
