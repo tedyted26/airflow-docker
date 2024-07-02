@@ -81,8 +81,12 @@ printf  "\n==================  "
 printf  "\n Start PostgreSQL  \n"
 printf  "================== \n\n"
 
-if [ "$PGDATA_DIR" ]; then
+if [ -n "$PGDATA_DIR" ]; then
   export PGDATA="$PGDATA_DIR"
+  if [ -z "$(ls -A "$PGDATA")" ]; then
+    # Directory is empty, initialize the database
+    /usr/lib/postgresql/*/bin/initdb -D "$PGDATA"
+  fi
   chmod 700 -R "$PGDATA"
   /usr/lib/postgresql/*/bin/pg_ctl -l "$PGDATA"/logfile start
   wait-for-postgres
@@ -93,6 +97,7 @@ else
   /usr/lib/postgresql/*/bin/pg_ctl -l "$PGDATA"/logfile start
   wait-for-postgres
 fi
+
 
 ## Apply configuration to PostgreSQL
 NEW_ENTRY="local airflow_db airflow_user password"
